@@ -3,7 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Api\AuthRequest;
+use App\Http\Requests\Api\LoginRequest;
+use App\Http\Requests\Api\RegisterRequest;
 use App\Services\AuthService;
 use Illuminate\Http\Request;
 
@@ -19,7 +20,7 @@ class AuthController extends Controller
     /**
      * Handle a registration request for the mobile app.
      */
-    public function register(AuthRequest $request)
+    public function register(RegisterRequest $request)
     {
         $result = $this->authService->register($request->validated());
 
@@ -34,7 +35,7 @@ class AuthController extends Controller
     /**
      * Handle a login request for the mobile app.
      */
-    public function login(AuthRequest $request)
+    public function login(LoginRequest $request)
     {
         $result = $this->authService->login($request->validated());
 
