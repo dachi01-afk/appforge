@@ -11,10 +11,47 @@
             </flux:sidebar.header>
 
             <flux:sidebar.nav>
-                <flux:sidebar.group :heading="__('Platform')" class="grid">
+                <flux:sidebar.group :heading="__('')" class="grid">
                     <flux:sidebar.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
                         {{ __('Dashboard') }}
                     </flux:sidebar.item>
+
+                    <flux:sidebar.item
+                        icon="shopping-bag"
+                        :href="route('orders.index')"
+                        :current="request()->routeIs('orders.*')"
+                        wire:navigate
+                    >
+                        {{ __('Orders') }}
+                    </flux:sidebar.item>
+
+                    <flux:sidebar.item
+                        icon="chat-bubble-left-right"
+                        :href="route('inbox.index')"
+                        :current="request()->routeIs('inbox.*')"
+                        wire:navigate
+                    >
+                        {{ __('Inbox') }}
+                    </flux:sidebar.item>
+
+                    <flux:sidebar.item
+                        icon="credit-card"
+                        {{-- :href="route('payments.index')" --}}
+                        {{-- :current="request()->routeIs('payments.*')" --}}
+                        wire:navigate
+                    >
+                        {{ __('Payments') }}
+                    </flux:sidebar.item>
+
+                    <flux:sidebar.item
+                        icon="users"
+                        {{-- :href="route('clients.index')" --}}
+                        {{-- :current="request()->routeIs('clients.*')" --}}
+                        wire:navigate
+                    >
+                        {{ __('Clients') }}
+                    </flux:sidebar.item>
+
                 </flux:sidebar.group>
             </flux:sidebar.nav>
 
@@ -90,10 +127,30 @@
 
         {{ $slot }}
 
-        @persist('toast')
+        {{-- @persist('toast')
             <flux:toast.group>
                 <flux:toast />
             </flux:toast.group>
+        @endpersist --}}
+
+        @persist('toast')
+
+        <div
+            x-data
+            x-on:notify.window="
+                Flux.toast({
+                    variant: $event.detail.type,
+                    text: $event.detail.message
+                })
+            "
+        >
+
+            <flux:toast.group>
+                <flux:toast />
+            </flux:toast.group>
+
+        </div>
+
         @endpersist
 
         @fluxScripts

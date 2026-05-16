@@ -2,10 +2,18 @@
 
 use Illuminate\Support\Facades\Route;
 
+
+
+
 Route::view('/', 'welcome')->name('home');
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'verified', 'admin'])->group(function () {
     Route::view('dashboard', 'dashboard')->name('dashboard');
+
+    Route::livewire('/orders', 'pages::orders.index')->name('orders.index');
+    Route::livewire('/orders/{order}', 'pages::orders.show')->name('orders.show');
+
+    Route::livewire('/inbox', 'pages::inbox.index')->name('inbox.index');
 });
 
-require __DIR__.'/settings.php';
+require __DIR__ . '/settings.php';
