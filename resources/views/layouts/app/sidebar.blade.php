@@ -36,8 +36,8 @@
 
                     <flux:sidebar.item
                         icon="credit-card"
-                        {{-- :href="route('payments.index')" --}}
-                        {{-- :current="request()->routeIs('payments.*')" --}}
+                        :href="route('payments.index')"
+                        :current="request()->routeIs('payments.*')"
                         wire:navigate
                     >
                         {{ __('Payments') }}
