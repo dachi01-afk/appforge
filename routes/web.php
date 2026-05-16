@@ -17,6 +17,9 @@ Route::middleware(['auth', 'verified', 'admin'])->group(function () {
 
     Route::livewire('/payments', 'pages::payments.index')->name('payments.index');
     Route::livewire('/payments/{payment}', 'pages::payments.show')->name('payments.show');
+
+    Route::livewire('/clients', 'pages::clients.index')->name('clients.index');
+    Route::livewire('/clients/{user}', 'pages::clients.show')->name('clients.show');
 });
 
 require __DIR__ . '/settings.php';

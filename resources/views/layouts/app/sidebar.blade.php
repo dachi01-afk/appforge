@@ -45,8 +45,8 @@
 
                     <flux:sidebar.item
                         icon="users"
-                        {{-- :href="route('clients.index')" --}}
-                        {{-- :current="request()->routeIs('clients.*')" --}}
+                        :href="route('clients.index')"
+                        :current="request()->routeIs('clients.*')"
                         wire:navigate
                     >
                         {{ __('Clients') }}

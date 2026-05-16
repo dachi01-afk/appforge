@@ -11,6 +11,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 use Laravel\Fortify\TwoFactorAuthenticatable;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 #[Fillable([
     'name',
@@ -50,5 +52,24 @@ class User extends Authenticatable
             ->take(2)
             ->map(fn($word) => Str::substr($word, 0, 1))
             ->implode('');
+    }
+
+    public function orders():HasMany
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    public function notifications():HasMany
+    {
+        return $this->hasMany(UserNotification::class);
+    }
+
+    /**
+     * Akses semua Payment milik client ini melalui Order.
+     * Digunakan untuk withSum/withCount langsung di query User.
+     */
+    public function payments(): HasManyThrough
+    {
+        return $this->hasManyThrough(Payment::class, Order::class);
     }
 }
