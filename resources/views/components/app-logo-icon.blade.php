@@ -1,5 +1,5 @@
 <img
     src="{{ asset('Logo.png') }}"
     alt="AppForge Logo"
-    {{ $attributes }}
+    {{ $attributes->merge(['class' => 'rounded-xl object-contain']) }}
 >

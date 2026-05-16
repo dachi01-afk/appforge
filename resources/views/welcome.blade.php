@@ -113,13 +113,15 @@
     <nav id="navbar" class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 py-6">
         <div class="max-w-7xl mx-auto px-6 flex items-center justify-between">
             <div class="flex items-center gap-2">
-                <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
-                    <flux:icon name="command-line" class="size-6 text-white" />
-                </div>
-                <div>
-                    <span class="text-xl font-bold tracking-tight">AppForge</span>
-                    <span class="block text-[10px] uppercase tracking-[0.2em] text-zinc-400 font-semibold leading-none">Studio</span>
-                </div>
+                <a href="{{ route('home') }}" class="flex items-center gap-3 group" wire:navigate>
+                    <div class="flex aspect-square size-10 items-center justify-center rounded-xl bg-white dark:bg-white/10 shadow-lg shadow-indigo-500/10 border border-zinc-200 dark:border-white/10 overflow-hidden p-1.5 group-hover:scale-105 transition-transform">
+                        <x-app-logo-icon class="size-full" />
+                    </div>
+                    <div>
+                        <span class="text-xl font-bold tracking-tight">AppForge</span>
+                        <span class="block text-[10px] uppercase tracking-[0.2em] text-zinc-400 font-semibold leading-none">Studio</span>
+                    </div>
+                </a>
             </div>
 
             <div class="hidden md:flex items-center gap-8">
@@ -347,14 +349,18 @@
                 </p>
                 <div class="flex flex-wrap gap-4">
                     <a href="#" class="flex items-center gap-3 bg-black text-white px-6 py-3 rounded-2xl hover:scale-105 transition-transform border border-zinc-800">
-                        <flux:icon name="command-line" class="size-8" />
+                        <div class="size-8 bg-white rounded-lg p-1 flex items-center justify-center">
+                            <x-app-logo-icon class="size-full" />
+                        </div>
                         <div class="text-left">
                             <div class="text-[10px] uppercase font-bold opacity-60 leading-none">Get it on</div>
                             <div class="text-xl font-bold leading-tight">Google Play</div>
                         </div>
                     </a>
                     <a href="#" class="flex items-center gap-3 bg-black text-white px-6 py-3 rounded-2xl hover:scale-105 transition-transform border border-zinc-800">
-                        <flux:icon name="at-symbol" class="size-8" />
+                        <div class="size-8 bg-white rounded-lg p-1 flex items-center justify-center">
+                            <x-app-logo-icon class="size-full" />
+                        </div>
                         <div class="text-left">
                             <div class="text-[10px] uppercase font-bold opacity-60 leading-none">Download on the</div>
                             <div class="text-xl font-bold leading-tight">App Store</div>
@@ -366,8 +372,8 @@
                 <div class="w-[280px] h-[580px] bg-zinc-900 rounded-[3rem] p-3 shadow-2xl border-4 border-zinc-800 relative">
                     <div class="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-zinc-800 rounded-b-2xl z-10"></div>
                     <div class="w-full h-full bg-indigo-600 rounded-[2.5rem] overflow-hidden p-6 flex flex-col justify-center items-center text-white text-center">
-                        <div class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mb-6">
-                            <flux:icon name="command-line" class="size-10" />
+                        <div class="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mb-6 shadow-xl p-2">
+                            <x-app-logo-icon class="size-full" />
                         </div>
                         <h3 class="text-2xl font-bold mb-2">AppForge</h3>
                         <p class="text-sm opacity-80">Ready to build your dream app?</p>
@@ -384,11 +390,11 @@
         <div class="max-w-7xl mx-auto px-6">
             <div class="grid lg:grid-cols-4 gap-12 mb-16">
                 <div class="lg:col-span-2">
-                    <div class="flex items-center gap-2 mb-6">
-                        <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
-                            <flux:icon name="command-line" class="size-5 text-white" />
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-10 h-10 bg-white dark:bg-white/10 rounded-xl flex items-center justify-center shadow-md border border-zinc-200 dark:border-white/10 p-1.5">
+                            <x-app-logo-icon class="size-full" />
                         </div>
-                        <span class="text-lg font-bold tracking-tight">AppForge</span>
+                        <span class="text-xl font-bold tracking-tight">AppForge</span>
                     </div>
                     <p class="text-zinc-500 max-w-sm mb-8">
                         Platform pemesanan pembuatan aplikasi mobile & web terpercaya. Kami menghadirkan kualitas premium dengan kecepatan startup.
