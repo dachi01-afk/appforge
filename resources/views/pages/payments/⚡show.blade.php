@@ -4,6 +4,7 @@ use Livewire\Component;
 use Livewire\Attributes\Computed;
 use App\Models\Payment;
 use Illuminate\Support\Facades\Validator;
+use App\Services\NotificationService;
 
 new class extends Component
 {
@@ -16,8 +17,9 @@ new class extends Component
     {
         $this->payment = $payment->load(['order.user']);
         $this->paymentMethod = $payment->payment_method ?? '';
-        // Jika statusnya sudah lunas, ambil catatan dari field payment_proof
-        if ($payment->status === 'paid') {
+        
+        // If paid, payment_proof might store the proof path or notes
+        if ($payment->status === 'paid' && !str_starts_with($payment->payment_proof ?? '', 'payments/')) {
             $this->notes = $payment->payment_proof ?? '';
         }
     }
@@ -38,9 +40,41 @@ new class extends Component
         $this->payment->update([
             'status'         => 'paid',
             'payment_method' => $this->paymentMethod,
-            'payment_proof'  => $this->notes ?: null, // simpan catatan di field ini
+            'payment_proof'  => $this->notes ?: $this->payment->payment_proof,
             'paid_at'        => now(),
         ]);
+
+        // Event handler: saat tagihan di-approve (paid), ubah status order terkait menjadi in_progress secara otomatis
+        $order = $this->payment->order;
+        if ($order && $order->status !== 'in_progress') {
+            $oldStatus = $order->status;
+            $order->update([
+                'status' => 'in_progress',
+                'progress' => max($order->progress, 10), // Set progress to 10% on payment confirmation
+                'started_at' => now(),
+            ]);
+
+            $order->statusHistories()->create([
+                'old_status' => $oldStatus,
+                'new_status' => 'in_progress',
+                'changed_by' => auth()->id(),
+                'note' => 'System: Pembayaran invoice ' . $this->payment->invoice_number . ' telah dikonfirmasi.',
+            ]);
+
+            // Notify user about order status transition (Fase 6)
+            app(NotificationService::class)->send(
+                $order->user,
+                'Order Diproses',
+                "Pembayaran Anda berhasil diverifikasi. Pesanan '{$order->title}' Anda sekarang sedang dikerjakan!"
+            );
+        }
+
+        // Send payment confirmation notification (Fase 6)
+        app(NotificationService::class)->send(
+            $this->payment->order->user,
+            'Pembayaran Berhasil',
+            "Pembayaran Anda untuk invoice '{$this->payment->invoice_number}' sebesar Rp " . number_format($this->payment->amount) . " telah dikonfirmasi dan diverifikasi oleh Admin."
+        );
 
         $this->payment->refresh();
         $this->dispatch('notify', type: 'success', message: 'Pembayaran dikonfirmasi lunas.');
@@ -52,6 +86,13 @@ new class extends Component
             'status'  => 'failed',
             'paid_at' => null,
         ]);
+
+        // Notify client that payment is rejected (Fase 6)
+        app(NotificationService::class)->send(
+            $this->payment->order->user,
+            'Pembayaran Ditolak',
+            "Bukti pembayaran Anda untuk invoice '{$this->payment->invoice_number}' ditolak. Silakan unggah bukti pembayaran yang valid."
+        );
 
         $this->payment->refresh();
         $this->dispatch('notify', type: 'warning', message: 'Pembayaran ditolak.');
@@ -126,6 +167,21 @@ new class extends Component
                     </div>
                 </div>
 
+                @if($payment->payment_proof)
+                    <div class="mt-6 border-t border-zinc-100 pt-6 dark:border-zinc-800">
+                        <p class="text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-3">Bukti Pembayaran (Payment Proof)</p>
+                        @if(str_starts_with($payment->payment_proof, 'payments/'))
+                            <div class="overflow-hidden rounded-xl border border-zinc-200 dark:border-zinc-800 max-h-96 flex justify-center bg-zinc-100 dark:bg-zinc-850">
+                                <img src="{{ Storage::disk('public')->url($payment->payment_proof) }}" alt="Bukti Transfer" class="object-contain max-h-96 w-full">
+                            </div>
+                        @else
+                            <div class="rounded-xl bg-zinc-100 p-4 dark:bg-zinc-800 text-sm text-zinc-700 dark:text-zinc-300">
+                                {{ $payment->payment_proof }}
+                            </div>
+                        @endif
+                    </div>
+                @endif
+
                 @if($payment->status === 'paid')
                     <div class="mt-8 border-t border-zinc-100 pt-8 dark:border-zinc-800">
                         <p class="text-xs font-semibold uppercase tracking-wider text-zinc-400">Payment Information</p>
@@ -138,7 +194,7 @@ new class extends Component
                                 <p class="text-sm text-zinc-500">Paid At</p>
                                 <p class="font-medium text-zinc-900 dark:text-white">{{ $payment->paid_at?->format('d M Y H:i') }}</p>
                             </div>
-                            @if($payment->payment_proof)
+                            @if($payment->payment_proof && !str_starts_with($payment->payment_proof, 'payments/'))
                                 <div class="sm:col-span-2">
                                     <p class="text-sm text-zinc-500">Notes/Remarks</p>
                                     <p class="mt-1 text-sm text-zinc-700 dark:text-zinc-300">{{ $payment->payment_proof }}</p>

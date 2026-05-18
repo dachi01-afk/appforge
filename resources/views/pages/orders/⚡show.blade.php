@@ -2,6 +2,7 @@
 
 use Livewire\Component;
 use App\Models\Order;
+use App\Services\NotificationService;
 
 new class extends Component
 {
@@ -17,6 +18,8 @@ new class extends Component
 
     public string $note = '';
 
+    public string $estimated_price = '';
+
     public function mount(Order $order): void
     {
         $this->order = $order->load([
@@ -31,6 +34,8 @@ new class extends Component
         $this->status = $order->status;
 
         $this->progress = $order->progress;
+
+        $this->estimated_price = $order->estimated_price ? (string) (int) $order->estimated_price : '';
     }
 
     public function updateStatus(): void
@@ -39,6 +44,7 @@ new class extends Component
             'status' => 'required',
             'progress' => 'required|integer|min:0|max:100',
             'note' => 'nullable|string|max:1000',
+            'estimated_price' => 'nullable|numeric|min:0',
         ]);
 
         $oldStatus = $this->order->status;
@@ -46,6 +52,7 @@ new class extends Component
         $this->order->update([
             'status' => $this->status,
             'progress' => $this->progress,
+            'estimated_price' => $this->estimated_price ?: null,
 
             'started_at' => $this->status === 'in_progress'
                 ? now()
@@ -63,6 +70,14 @@ new class extends Component
             'note' => $this->note,
         ]);
 
+        if ($oldStatus !== $this->status) {
+            app(NotificationService::class)->send(
+                $this->order->user,
+                'Order Status Updated',
+                "Your order '{$this->order->title}' status has been updated to " . str_replace('_', ' ', $this->status)
+            );
+        }
+
         $this->order->refresh();
 
         $this->showStatusModal = false;
@@ -74,6 +89,37 @@ new class extends Component
             type: 'success',
             message: 'Order status updated successfully.'
         );
+    }
+
+    public function generateInvoice(): void
+    {
+        if ($this->order->payments()->exists()) {
+            $this->dispatch('notify', type: 'error', message: 'Invoice already exists.');
+            return;
+        }
+
+        if (!$this->order->estimated_price) {
+            $this->dispatch('notify', type: 'error', message: 'Set Estimated Price first.');
+            return;
+        }
+
+        $invoiceNumber = 'INV-' . strtoupper(uniqid());
+
+        $this->order->payments()->create([
+            'invoice_number' => $invoiceNumber,
+            'amount' => $this->order->estimated_price,
+            'status' => 'pending',
+        ]);
+
+        app(NotificationService::class)->send(
+            $this->order->user,
+            'Invoice Generated',
+            "An invoice '{$invoiceNumber}' has been generated for order '{$this->order->title}' with amount Rp " . number_format($this->order->estimated_price)
+        );
+
+        $this->order->refresh();
+
+        $this->dispatch('notify', type: 'success', message: 'Invoice generated successfully.');
     }
 };
 ?>
@@ -525,6 +571,17 @@ new class extends Component
 
                     @endforelse
 
+                    @if($order->payments->isEmpty() && $order->estimated_price > 0)
+                        <flux:button
+                            variant="primary"
+                            size="sm"
+                            class="w-full mt-4"
+                            wire:click="generateInvoice"
+                        >
+                            Generate Invoice
+                        </flux:button>
+                    @endif
+
                 </div>
 
             </div>
@@ -560,6 +617,13 @@ new class extends Component
             <option value="rejected">Rejected</option>
 
         </flux:select>
+
+        <flux:input
+            type="number"
+            wire:model="estimated_price"
+            label="Estimated Price (Rp)"
+            placeholder="Enter fixed/estimated price..."
+        />
 
         <flux:input
             type="number"
