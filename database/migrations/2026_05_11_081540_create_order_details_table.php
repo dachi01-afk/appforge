@@ -20,7 +20,8 @@ return new class extends Migration
             $table->json('feature_list');
 
             $table->text('design_preference');
-            $table->text('reference_app');
+            $table->text('reference_app')
+                ->nullable();
 
             $table->text('target_user')
                 ->nullable();

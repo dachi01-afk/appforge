@@ -17,7 +17,8 @@ return new class extends Migration
                 ->constrained()
                 ->cascadeOnDelete();
 
-            $table->string('old_status');
+            $table->string('old_status')
+                ->nullable();
 
             $table->string('new_status');
 
