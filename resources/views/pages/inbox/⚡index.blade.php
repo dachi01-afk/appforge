@@ -23,9 +23,17 @@ new class extends Component
      */
     public function mount(): void
     {
-        $first = $this->conversationList->first();
-        if ($first) {
-            $this->selectedOrderId = $first->id;
+        $orderId = request()->query('order');
+        if ($orderId) {
+            $this->selectedOrderId = (int) $orderId;
+        } else {
+            $first = $this->conversationList->first();
+            if ($first) {
+                $this->selectedOrderId = $first->id;
+            }
+        }
+
+        if ($this->selectedOrderId) {
             $this->markAsRead();
         }
     }
